@@ -11,7 +11,8 @@ export async function GET() {
       orderBy: { order: 'asc' }
     })
     return NextResponse.json(courses)
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'DB not ready' }, { status: 500 })
   }
 }
@@ -21,7 +22,8 @@ export async function POST(req: Request) {
     const body = await req.json()
     const course = await prisma.course.create({ data: body })
     return NextResponse.json(course, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error creating course' }, { status: 500 })
   }
 }

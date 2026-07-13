@@ -16,5 +16,6 @@ export async function GET() {
       orderBy: { createdAt: 'asc' }
     })
     return NextResponse.json(courses)
-  } catch { return NextResponse.json([]) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json([]) }
 }

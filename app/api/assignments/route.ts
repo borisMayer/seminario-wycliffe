@@ -13,7 +13,8 @@ export async function GET(req: Request) {
       orderBy: { createdAt: 'asc' }
     })
     return NextResponse.json(assignments)
-  } catch { return NextResponse.json([]) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json([]) }
 }
 
 export async function POST(req: Request) {

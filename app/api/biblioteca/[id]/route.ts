@@ -12,7 +12,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const data = await req.json()
     const text = await prisma.sacredText.update({ where: { id }, data })
     return NextResponse.json(text)
-  } catch { return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -23,5 +24,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   try {
     await prisma.sacredText.delete({ where: { id } })
     return NextResponse.json({ success: true })
-  } catch { return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }

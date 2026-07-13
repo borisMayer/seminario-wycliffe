@@ -11,7 +11,8 @@ export async function GET() {
       where: { userId: (session.user as any).id }
     })
     return NextResponse.json(progress)
-  } catch { return NextResponse.json([]) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json([]) }
 }
 
 export async function POST(req: Request) {
@@ -25,5 +26,6 @@ export async function POST(req: Request) {
       create: { userId: (session.user as any).id, lessonId, completed }
     })
     return NextResponse.json(progress)
-  } catch { return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }

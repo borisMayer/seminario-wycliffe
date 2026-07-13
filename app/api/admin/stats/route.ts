@@ -16,7 +16,8 @@ export async function GET() {
       prisma.forumPost.count(),
     ])
     return NextResponse.json({ users, courses, enrollments, posts })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ users: 0, courses: 0, enrollments: 0, posts: 0 })
   }
 }

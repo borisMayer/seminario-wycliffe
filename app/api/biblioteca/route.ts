@@ -30,7 +30,8 @@ export async function GET() {
 
     // Always return all texts to rector/premium, mark isPremium for UI
     return NextResponse.json({ texts, isPremium: premium })
-  } catch { return NextResponse.json({ texts: [], isPremium: false }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ texts: [], isPremium: false }) }
 }
 
 export async function POST(req: Request) {

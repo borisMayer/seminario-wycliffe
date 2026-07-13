@@ -10,7 +10,8 @@ export async function GET(req: Request) {
       orderBy: { createdAt: 'desc' }
     })
     return NextResponse.json(texts)
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'DB not ready' }, { status: 500 })
   }
 }

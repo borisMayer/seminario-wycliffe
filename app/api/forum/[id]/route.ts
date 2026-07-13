@@ -18,7 +18,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     })
     if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json(post)
-  } catch { return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -33,5 +34,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     if (!isOwner && !isRector) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     await prisma.forumPost.delete({ where: { id } })
     return NextResponse.json({ success: true })
-  } catch { return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }

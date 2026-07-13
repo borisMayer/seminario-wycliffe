@@ -14,7 +14,8 @@ export async function GET() {
       take: 50
     })
     return NextResponse.json(posts)
-  } catch { return NextResponse.json([]) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json([]) }
 }
 
 export async function POST(req: Request) {
@@ -31,5 +32,6 @@ export async function POST(req: Request) {
       }
     })
     return NextResponse.json(post, { status: 201 })
-  } catch { return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }

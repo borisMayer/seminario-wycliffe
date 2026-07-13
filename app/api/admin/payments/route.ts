@@ -16,7 +16,8 @@ export async function GET() {
     })
     const total = payments.filter(p => p.status === 'approved').reduce((acc, p) => acc + p.amount, 0)
     return NextResponse.json({ payments, total })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ payments: [], total: 0 })
   }
 }

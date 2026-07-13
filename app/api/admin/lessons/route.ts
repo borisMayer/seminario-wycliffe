@@ -19,7 +19,8 @@ export async function GET(req: Request) {
       orderBy: { order: 'asc' }
     })
     return NextResponse.json(lessons)
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json([])
   }
 }
@@ -37,7 +38,8 @@ export async function POST(req: Request) {
       data: { ...body, order: (last?.order ?? 0) + 1 }
     })
     return NextResponse.json(lesson, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error creating lesson' }, { status: 500 })
   }
 }
@@ -48,7 +50,8 @@ export async function PATCH(req: Request) {
     const { id, ...data } = await req.json()
     const lesson = await prisma.lesson.update({ where: { id }, data })
     return NextResponse.json(lesson)
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error updating lesson' }, { status: 500 })
   }
 }
@@ -59,7 +62,8 @@ export async function DELETE(req: Request) {
     const { id } = await req.json()
     await prisma.lesson.delete({ where: { id } })
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error deleting lesson' }, { status: 500 })
   }
 }

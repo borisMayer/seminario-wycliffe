@@ -15,7 +15,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       include: { user: { select: { id: true, name: true, role: true, image: true } } }
     })
     return NextResponse.json(comment, { status: 201 })
-  } catch { return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }
 
 export async function DELETE(req: Request) {
@@ -30,5 +31,6 @@ export async function DELETE(req: Request) {
     if (!isOwner && !isRector) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     await prisma.forumComment.delete({ where: { id: commentId } })
     return NextResponse.json({ success: true })
-  } catch { return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }

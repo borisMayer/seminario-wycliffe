@@ -25,7 +25,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       enrolled = !!enrollment
     }
     return NextResponse.json({ ...course, enrolled })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error' }, { status: 500 })
   }
 }

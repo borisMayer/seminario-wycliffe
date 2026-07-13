@@ -12,7 +12,8 @@ export async function GET() {
       include: { course: { include: { _count: { select: { lessons: true } } } } }
     })
     return NextResponse.json(enrollments)
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json([])
   }
 }
@@ -30,7 +31,8 @@ export async function POST(req: Request) {
       data: { userId: (session.user as any).id, courseId }
     })
     return NextResponse.json(enrollment, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error al matricularse' }, { status: 500 })
   }
 }
@@ -44,7 +46,8 @@ export async function DELETE(req: Request) {
       where: { userId_courseId: { userId: (session.user as any).id, courseId } }
     })
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error al cancelar matrícula' }, { status: 500 })
   }
 }

@@ -15,7 +15,8 @@ export async function POST(req: Request) {
       data: { name, email, password, role: 'STUDENT' }
     })
     return NextResponse.json({ id: user.id, name: user.name, email: user.email, role: user.role }, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error al crear cuenta' }, { status: 500 })
   }
 }

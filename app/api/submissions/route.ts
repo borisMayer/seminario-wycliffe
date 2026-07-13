@@ -19,7 +19,8 @@ export async function GET(req: Request) {
       orderBy: { submittedAt: 'desc' }
     })
     return NextResponse.json(submissions)
-  } catch { return NextResponse.json([]) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json([]) }
 }
 
 export async function POST(req: Request) {

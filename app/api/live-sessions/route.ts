@@ -17,7 +17,8 @@ export async function GET(req: Request) {
       orderBy: { scheduledAt: 'asc' }
     })
     return NextResponse.json(sessions)
-  } catch { return NextResponse.json([]) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json([]) }
 }
 
 export async function POST(req: Request) {

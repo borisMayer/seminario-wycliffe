@@ -16,7 +16,8 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     })
     return NextResponse.json(users)
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json([])
   }
 }
@@ -30,7 +31,8 @@ export async function PATCH(req: Request) {
     const { id, role } = await req.json()
     const user = await prisma.user.update({ where: { id }, data: { role } })
     return NextResponse.json(user)
-  } catch {
+  } catch (error) {
+    console.error('[API ERROR]', error)
     return NextResponse.json({ error: 'Error updating user' }, { status: 500 })
   }
 }

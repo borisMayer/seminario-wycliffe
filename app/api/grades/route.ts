@@ -28,7 +28,8 @@ export async function GET(req: Request) {
     })
     // Attach userId to each grade for frontend use
     return NextResponse.json(grades.map(g => ({ ...g, userId: g.userId })))
-  } catch { return NextResponse.json([]) }
+  } catch (error) {
+    console.error('[API ERROR]', error) return NextResponse.json([]) }
 }
 
 export async function POST(req: Request) {
