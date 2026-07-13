@@ -3,7 +3,10 @@
 -- Run this in Neon SQL Editor
 -- ============================================
 
-CREATE TYPE IF NOT EXISTS "Role" AS ENUM ('RECTOR', 'STUDENT', 'VISITOR');
+DO $$ BEGIN
+  CREATE TYPE "Role" AS ENUM ('RECTOR', 'STUDENT', 'VISITOR');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS "User" (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
