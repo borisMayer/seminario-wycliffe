@@ -1,0 +1,224 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String?
+  email        String        @unique
+  password     String?
+  image        String?
+  role         Role          @default(STUDENT)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  enrollments  Enrollment[]
+  posts        ForumPost[]
+  comments     ForumComment[]
+  progress     Progress[]
+  payments     Payment[]
+  subscription Subscription?
+  submissions  Submission[]
+  grades       Grade[]
+}
+
+enum Role {
+  RECTOR
+  STUDENT
+  VISITOR
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String
+  imageUrl    String?
+  published   Boolean  @default(false)
+  price       Float    @default(0)
+  isFree      Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons     Lesson[]
+  enrollments Enrollment[]
+  forumPosts  ForumPost[]
+  payments     Payment[]
+  assignments  Assignment[]
+  liveSessions LiveSession[]
+}
+
+model Lesson {
+  id        String     @id @default(cuid())
+  courseId  String
+  title     String
+  content   String     @db.Text
+  videoUrl  String?
+  order     Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress  Progress[]
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String
+  completed Boolean  @default(false)
+  updatedAt DateTime @updatedAt @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  userId         String
+  courseId       String?
+  type           String
+  amount         Float
+  currency       String   @default("USD")
+  status         String   @default("pending")
+  mpPaymentId    String?
+  mpPreferenceId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course         Course?  @relation(fields: [courseId], references: [id])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  status    String   @default("active")
+  plan      String   @default("monthly")
+  amount    Float
+  currency  String   @default("USD")
+  startsAt  DateTime @default(now())
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SacredText {
+  id          String   @id @default(cuid())
+  title       String
+  author      String?
+  category    String
+  language    String   @default("he")
+  fileUrl     String?
+  description String?
+  isPremium   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model ForumPost {
+  id        String         @id @default(cuid())
+  userId    String
+  courseId  String?
+  title     String
+  content   String         @db.Text
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt @default(now())
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course?        @relation(fields: [courseId], references: [id])
+  comments  ForumComment[]
+}
+
+model ForumComment {
+  id        String    @id @default(cuid())
+  postId    String
+  userId    String
+  content   String    @db.Text
+  createdAt DateTime  @default(now())
+
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?  @db.Text
+  type        String   // "trabajo" | "examen" | "foro" | "proyecto" | "quiz"
+  weight      Float    @default(0) // porcentaje sobre 100
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  course      Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+  grades      Grade[]
+}
+
+model Submission {
+  id           String   @id @default(cuid())
+  assignmentId String
+  userId       String
+  fileUrl      String?
+  content      String?  @db.Text
+  submittedAt  DateTime @default(now())
+  feedback     String?  @db.Text
+  feedbackAt   DateTime?
+
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, userId])
+}
+
+model Grade {
+  id           String   @id @default(cuid())
+  assignmentId String
+  userId       String
+  score        Float    // 0-100
+  comment      String?
+  gradedAt     DateTime @default(now())
+  gradedBy     String
+
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, userId])
+}
+
+model LiveSession {
+  id          String   @id @default(cuid())
+  courseId    String?
+  title       String
+  description String?  @db.Text
+  meetingUrl  String
+  platform    String   @default("zoom") // zoom | meet | teams | youtube | other
+  scheduledAt DateTime
+  duration    Int      @default(60) // minutes
+  recordingUrl String?
+  materials   String?  @db.Text // JSON array of {name, url}
+  isGlobal    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  course      Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+}

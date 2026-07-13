@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dim: #7a6230;
+  --ink: #021A38;
+  --parchment: #F5EDD8;
+}
+
+.font-cinzel { font-family: var(--font-cinzel), serif; }
+.font-garamond { font-family: var(--font-garamond), serif; }
+
+html { scroll-behavior: smooth; }
+
+::selection {
+  background: rgba(201,168,76,0.3);
+  color: #F5EDD8;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #021A38; }
+::-webkit-scrollbar-thumb { background: #7a6230; border-radius: 3px; }
