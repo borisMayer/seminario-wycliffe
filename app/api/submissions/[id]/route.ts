@@ -17,5 +17,5 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     })
     return NextResponse.json(sub)
   } catch (error) {
-    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+    console.error('[API ERROR]', error); return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }

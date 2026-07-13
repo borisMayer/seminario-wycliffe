@@ -17,5 +17,5 @@ export async function GET() {
     })
     return NextResponse.json(courses)
   } catch (error) {
-    console.error('[API ERROR]', error) return NextResponse.json([]) }
+    console.error('[API ERROR]', error); return NextResponse.json([]) }
 }

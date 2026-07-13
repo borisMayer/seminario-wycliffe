@@ -16,7 +16,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     })
     return NextResponse.json(comment, { status: 201 })
   } catch (error) {
-    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+    console.error('[API ERROR]', error); return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }
 
 export async function DELETE(req: Request) {
@@ -32,5 +32,5 @@ export async function DELETE(req: Request) {
     await prisma.forumComment.delete({ where: { id: commentId } })
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+    console.error('[API ERROR]', error); return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }

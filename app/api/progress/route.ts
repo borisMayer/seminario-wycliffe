@@ -12,7 +12,7 @@ export async function GET() {
     })
     return NextResponse.json(progress)
   } catch (error) {
-    console.error('[API ERROR]', error) return NextResponse.json([]) }
+    console.error('[API ERROR]', error); return NextResponse.json([]) }
 }
 
 export async function POST(req: Request) {
@@ -27,5 +27,5 @@ export async function POST(req: Request) {
     })
     return NextResponse.json(progress)
   } catch (error) {
-    console.error('[API ERROR]', error) return NextResponse.json({ error: 'Error' }, { status: 500 }) }
+    console.error('[API ERROR]', error); return NextResponse.json({ error: 'Error' }, { status: 500 }) }
 }

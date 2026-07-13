@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     })
     return NextResponse.json(assignments)
   } catch (error) {
-    console.error('[API ERROR]', error) return NextResponse.json([]) }
+    console.error('[API ERROR]', error); return NextResponse.json([]) }
 }
 
 export async function POST(req: Request) {
