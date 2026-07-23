@@ -52,6 +52,20 @@ function classify(mime: string, fileName: string) {
   if (DOC_MIME.includes(mime) || ['doc', 'docx', 'txt', 'md', 'epub'].includes(ext)) {
     return { cloudinaryType: 'raw' as const, resourceType: 'text', maxBytes: 10 * MB }
   }
+  // Hojas de cálculo, otros formatos de documento y archivos comprimidos
+  if (
+    ['xls', 'xlsx', 'csv', 'rtf', 'odt', 'ods', 'odp', 'zip'].includes(ext) ||
+    ['application/vnd.ms-excel',
+     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+     'text/csv',
+     'application/rtf', 'text/rtf',
+     'application/vnd.oasis.opendocument.text',
+     'application/vnd.oasis.opendocument.spreadsheet',
+     'application/vnd.oasis.opendocument.presentation',
+     'application/zip', 'application/x-zip-compressed'].includes(mime)
+  ) {
+    return { cloudinaryType: 'raw' as const, resourceType: 'text', maxBytes: 10 * MB }
+  }
   return null
 }
 
@@ -74,7 +88,7 @@ export async function POST(req: Request) {
     const kind = classify(file.type, file.name)
     if (!kind) {
       return NextResponse.json(
-        { error: 'Formato no admitido. Se aceptan PDF, Word, PowerPoint, TXT, EPUB, audio (mp3, wav, m4a), video (mp4, webm, mov) e imágenes.' },
+        { error: 'Formato no admitido. Se aceptan PDF, Word, Excel, PowerPoint, CSV, RTF, ODT, ZIP, TXT, EPUB, audio (mp3, wav, m4a), video (mp4, webm, mov) e imágenes.' },
         { status: 400 }
       )
     }
