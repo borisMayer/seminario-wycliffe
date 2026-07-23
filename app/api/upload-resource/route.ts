@@ -101,15 +101,23 @@ export async function POST(req: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
     const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9._-]/g, '_')
+
+    // En 'raw' Cloudinary no deduce el formato: si el public_id no lleva la
+    // extensión, la URL sale sin ella y el navegador no sabe abrir el archivo.
+    const publicId =
+      kind.cloudinaryType === 'raw' && ext
+        ? `${Date.now()}-${baseName}.${ext}`
+        : `${Date.now()}-${baseName}`
 
     const result = await new Promise<any>((resolve, reject) => {
       getCloudinary().uploader.upload_stream(
         {
           folder: `seminario-wycliffe/materiales/${lessonId}`,
           resource_type: kind.cloudinaryType,
-          public_id: `${Date.now()}-${baseName}`,
-          use_filename: true,
+          public_id: publicId,
+          use_filename: false,
           unique_filename: false,
         },
         (error, uploaded) => (error ? reject(error) : resolve(uploaded))

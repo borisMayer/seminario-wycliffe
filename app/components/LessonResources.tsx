@@ -6,6 +6,7 @@ import {
   Link2, ImageIcon, Download, Check, Loader2, ExternalLink, Archive
 } from 'lucide-react'
 import { isExternalPlatformVideo } from '@/lib/videoEmbed'
+import { toDownloadUrl, extensionFromUrl } from '@/lib/downloadUrl'
 
 /* ─────────────────────────── Tipos ─────────────────────────── */
 
@@ -76,10 +77,10 @@ function safeFileName(r: LessonResource): string {
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z0-9\s._-]/g, '')
     .trim().replace(/\s+/g, '-')
-  const fromUrl = r.url.split('?')[0].split('#')[0].split('.').pop() ?? ''
-  const ext = /^[a-zA-Z0-9]{2,4}$/.test(fromUrl)
-    ? fromUrl
-    : ({ pdf: 'pdf', audio: 'mp3', video: 'mp4', slides: 'pdf', image: 'jpg', text: 'txt', link: 'txt' }[r.type])
+  // La extensión real siempre manda; el mapa por tipo es solo el último recurso.
+  const ext =
+    extensionFromUrl(r.url) ??
+    ({ pdf: 'pdf', audio: 'mp3', video: 'mp4', slides: 'pptx', image: 'jpg', text: 'txt', link: 'txt' }[r.type])
   return `${clean || 'recurso'}.${ext}`
 }
 
@@ -197,7 +198,7 @@ export default function LessonResources({
       for (let i = 0; i < downloadables.length; i++) {
         const r = downloadables[i]
         try {
-          const res = await fetch(r.url)
+          const res = await fetch(toDownloadUrl(r.url, safeFileName(r)))
           if (!res.ok) throw new Error(String(res.status))
           zip.file(safeFileName(r), await res.blob())
         } catch {
@@ -411,7 +412,7 @@ export default function LessonResources({
                     </a>
                     {canDownload && (
                       <a
-                        href={r.url}
+                        href={toDownloadUrl(r.url, safeFileName(r))}
                         download={safeFileName(r)}
                         className="inline-flex items-center gap-1 text-[#F5EDD8]/45 transition-colors hover:text-[#F5EDD8]/80
                                    focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C9A84C]"
