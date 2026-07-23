@@ -31,17 +31,22 @@ export async function POST() {
 
   const pasos: Paso[] = [{ paso: 'Sesión y permisos', ok: true, detalle: 'Sesión válida con rol RECTOR.' }]
 
-  // 1 · Variables de entorno
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim()
-  const apiKey = process.env.CLOUDINARY_API_KEY?.trim()
-  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim()
+  // 1 · Credenciales (tres variables sueltas o CLOUDINARY_URL)
+  const { readCredentials } = await import('@/lib/cloudinary')
+  const { cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret, source } = readCredentials()
   const faltan = [!cloudName && 'CLOUDINARY_CLOUD_NAME', !apiKey && 'CLOUDINARY_API_KEY', !apiSecret && 'CLOUDINARY_API_SECRET'].filter(Boolean)
 
   if (faltan.length) {
-    pasos.push({ paso: 'Variables de entorno', ok: false, detalle: `Faltan en Vercel: ${faltan.join(', ')}. Añádelas en Settings → Environment Variables (Production, Preview y Development) y vuelve a desplegar.` })
+    pasos.push({
+      paso: 'Variables de entorno',
+      ok: false,
+      detalle:
+        `Este despliegue no tiene credenciales de Cloudinary. Añade en Vercel → Settings → Environment Variables o bien las tres variables (${faltan.join(', ')}), ` +
+        `o una sola llamada CLOUDINARY_URL con el valor cloudinary://api_key:api_secret@cloud_name. Marca Production, Preview y Development y haz Redeploy: sin un despliegue nuevo la variable no se aplica.`,
+    })
     return NextResponse.json({ ok: false, pasos })
   }
-  pasos.push({ paso: 'Variables de entorno', ok: true, detalle: `Cloud "${cloudName}", API key terminada en …${apiKey!.slice(-4)}, secreto de ${apiSecret!.length} caracteres.` })
+  pasos.push({ paso: 'Variables de entorno', ok: true, detalle: `Leídas desde ${source === 'CLOUDINARY_URL' ? 'CLOUDINARY_URL' : 'las tres variables sueltas'}. Cloud "${cloudName}", API key terminada en …${apiKey!.slice(-4)}, secreto de ${apiSecret!.length} caracteres.` })
 
   // Aviso: los secretos de Cloudinary tienen 27 caracteres
   if (apiSecret!.length !== 27) {

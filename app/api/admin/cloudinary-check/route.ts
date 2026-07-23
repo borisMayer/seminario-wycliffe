@@ -15,23 +15,22 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const vars = {
-    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME?.trim(),
-    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY?.trim(),
-    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET?.trim(),
-  }
+  const { cloud_name, api_key, api_secret, source } = (await import('@/lib/cloudinary')).readCredentials()
 
-  const missing = Object.entries(vars).filter(([, v]) => !v).map(([k]) => k)
+  const missing = [!cloud_name && 'CLOUDINARY_CLOUD_NAME', !api_key && 'CLOUDINARY_API_KEY', !api_secret && 'CLOUDINARY_API_SECRET'].filter(Boolean)
   if (missing.length) {
     return NextResponse.json({
       ok: false,
       stage: 'variables',
       missing,
       message:
-        `Faltan variables de entorno en Vercel: ${missing.join(', ')}. ` +
-        `Añádelas en Vercel → Settings → Environment Variables (Production, Preview y Development) y vuelve a desplegar.`,
+        `No hay credenciales de Cloudinary en este despliegue. Opción A: añade las tres variables ${missing.join(', ')}. ` +
+        `Opción B, más simple: añade una sola variable llamada CLOUDINARY_URL con el valor cloudinary://api_key:api_secret@cloud_name que copias de la consola de Cloudinary. ` +
+        `En ambos casos marca Production, Preview y Development, y después haz Redeploy: las variables solo se aplican en un despliegue nuevo.`,
     })
   }
+
+  const vars = { CLOUDINARY_CLOUD_NAME: cloud_name, CLOUDINARY_API_KEY: api_key, CLOUDINARY_API_SECRET: api_secret }
 
   try {
     const { getCloudinary } = await import('@/lib/cloudinary')
@@ -55,6 +54,7 @@ export async function GET() {
       stage: 'conectado',
       cloudName: vars.CLOUDINARY_CLOUD_NAME,
       apiKeyTail: `…${vars.CLOUDINARY_API_KEY!.slice(-4)}`,
+      source,
       pdfDelivery,
       message: 'Conexión con Cloudinary correcta. Ya puedes subir materiales.',
     })
