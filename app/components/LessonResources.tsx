@@ -108,11 +108,14 @@ export default function LessonResources({
   lessonId,
   lessonTitle,
   resources: resourcesProp,
+  onCount,
 }: {
   lessonId: string
   lessonTitle?: string
   /** Si la página ya trae los recursos, se usan y se omite el fetch. */
   resources?: LessonResource[]
+  /** Informa al contenedor cuántos materiales tiene la lección. */
+  onCount?: (n: number) => void
 }) {
   const [resources, setResources] = useState<LessonResource[]>(resourcesProp ?? [])
   const [loading, setLoading] = useState(!resourcesProp)
@@ -132,14 +135,15 @@ export default function LessonResources({
       .then((data: { resources?: LessonResource[]; completedIds?: string[] }) => {
         if (cancelled) return
         setResources(data.resources ?? [])
+        onCount?.((data.resources ?? []).length)
         // La base de datos manda; localStorage cubre a quien aún no inicia sesión.
         const fromDb = new Set(data.completedIds ?? [])
         setDone(fromDb.size > 0 ? fromDb : readLocal())
         setLoading(false)
       })
-      .catch(() => { if (!cancelled) { setResources([]); setLoading(false) } })
+      .catch(() => { if (!cancelled) { setResources([]); setLoading(false); onCount?.(0) } })
     return () => { cancelled = true }
-  }, [lessonId, resourcesProp])
+  }, [lessonId, resourcesProp, onCount])
 
   useEffect(() => { setDone(prev => (prev.size ? prev : readLocal())) }, [])
 
@@ -249,7 +253,7 @@ export default function LessonResources({
   }
 
   return (
-    <section className="mt-12 border-t border-[#C9A84C]/10 pt-7" aria-labelledby="materiales-heading">
+    <section id="materiales" className="mt-12 scroll-mt-6 border-t border-[#C9A84C]/10 pt-7" aria-labelledby="materiales-heading">
       {/* Encabezado */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>

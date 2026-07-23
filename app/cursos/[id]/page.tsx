@@ -18,6 +18,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
   const [completing, setCompleting] = useState(false)
   const [courseTab, setCourseTab] = useState<'lecciones' | 'sincronicas'>('lecciones')
   const [liveSessions, setLiveSessions] = useState<any[]>([])
+  const [materialCount, setMaterialCount] = useState(0)
 
   useEffect(() => {
     fetch(`/api/courses/${id}`)
@@ -238,6 +239,11 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
                   {activeLesson.title}
                 </h1>
                 <div style={{ height: '1px', background: 'linear-gradient(to right, rgba(201,168,76,0.3), transparent)' }} />
+                {materialCount > 0 && (
+                  <a href="#materiales" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.9rem', padding: '0.35rem 0.85rem', border: '1px solid rgba(201,168,76,0.3)', borderRadius: '20px', background: 'rgba(201,168,76,0.06)', color: '#C9A84C', textDecoration: 'none', fontFamily: 'Georgia, serif', fontSize: '0.72rem', letterSpacing: '0.1em' }}>
+                    📎 {materialCount} {materialCount === 1 ? 'MATERIAL' : 'MATERIALES'} ↓
+                  </a>
+                )}
               </div>
 
               {/* Video embed */}
@@ -262,6 +268,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
                 key={activeLesson.id}
                 lessonId={activeLesson.id}
                 lessonTitle={activeLesson.title}
+                onCount={setMaterialCount}
               />
 
               {/* Navigation & completion */}
