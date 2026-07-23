@@ -47,6 +47,8 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
   const [mode, setMode] = useState<'archivo' | 'enlace'>('archivo')
   const [dragging, setDragging] = useState(false)
   const [diag, setDiag] = useState<{ ok: boolean; message: string; pdfDelivery?: boolean | null } | null>(null)
+  const [prueba, setPrueba] = useState<{ ok: boolean; pasos: { paso: string; ok: boolean; detalle: string }[] } | null>(null)
+  const [probando, setProbando] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -71,7 +73,13 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
   useEffect(() => {
     let vivo = true
     fetch('/api/admin/cloudinary-check')
-      .then(r => r.json())
+      .then(async r => {
+        const d = await r.json().catch(() => ({}))
+        if (r.status === 401 || d?.error === 'Unauthorized') {
+          return { ok: false, message: 'Tu sesión no tiene rol RECTOR, y la carga de materiales lo exige. Vuelve a iniciar sesión con la cuenta de Rector, o corrige el rol en la pestaña Estudiantes.' }
+        }
+        return d
+      })
       .then(d => { if (vivo) setDiag(d) })
       .catch(() => { if (vivo) setDiag({ ok: false, message: 'No se pudo verificar la conexión con Cloudinary.' }) })
     return () => { vivo = false }
@@ -123,13 +131,38 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
     load()
   }
 
-  const remove = async (id: string, title: string) => {
-    if (!confirm(`¿Eliminar "${title}"? El archivo también se borrará de Cloudinary.`)) return
+  const borrarRecurso = async (id: string) => {
     await fetch(`/api/lessons/${lessonId}/resources`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })
+  }
+
+  // Prueba de funcionamiento real contra Cloudinary
+  const probarCarga = async () => {
+    setProbando(true); setPrueba(null)
+    try {
+      const r = await fetch('/api/admin/prueba-carga', { method: 'POST' })
+      setPrueba(await r.json())
+    } catch {
+      setPrueba({ ok: false, pasos: [{ paso: 'Conexión', ok: false, detalle: 'No se pudo contactar con el servidor.' }] })
+    }
+    setProbando(false)
+  }
+
+  // Elimina de golpe los materiales de demostración sembrados en la base de datos
+  const demos = resources.filter(r => /^\s*PRUEBA\b/i.test(r.title))
+  const limpiarDemos = async () => {
+    if (!confirm(`Se eliminarán ${demos.length} materiales de demostración de esta lección. ¿Continuar?`)) return
+    for (const d of demos) await borrarRecurso(d.id)
+    flash('Materiales de demostración eliminados.')
+    load()
+  }
+
+  const remove = async (id: string, title: string) => {
+    if (!confirm(`¿Eliminar "${title}"? El archivo también se borrará de Cloudinary.`)) return
+    await borrarRecurso(id)
     load()
   }
 
@@ -151,6 +184,37 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
       {diag?.ok && diag.pdfDelivery === false && (
         <div style={{ fontSize: '0.75rem', color: '#E8C97A', padding: '0.6rem 0.8rem', background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: '6px', marginBottom: '0.9rem', lineHeight: 1.5 }}>
           ⚠ La entrega de PDF y ZIP está bloqueada en tu cuenta. Actívala en console.cloudinary.com → Settings → Security → «PDF and ZIP files delivery» → Allow delivery. Sin eso, los PDF suben pero el alumno no puede abrirlos.
+        </div>
+      )}
+
+      {/* Herramientas: prueba real de carga y limpieza de demostración */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.9rem' }}>
+        <button onClick={probarCarga} disabled={probando}
+          style={{ padding: '0.4rem 0.9rem', background: 'transparent', border: `1px solid ${G.gold}`, borderRadius: '5px', color: G.gold, fontSize: '0.65rem', letterSpacing: '0.1em', cursor: probando ? 'default' : 'pointer', fontFamily: 'Georgia, serif', opacity: probando ? 0.5 : 1 }}>
+          {probando ? 'PROBANDO…' : '⚙ PROBAR CARGA A CLOUDINARY'}
+        </button>
+        {demos.length > 0 && (
+          <button onClick={limpiarDemos}
+            style={{ padding: '0.4rem 0.9rem', background: 'transparent', border: '1px solid rgba(224,85,85,0.45)', borderRadius: '5px', color: G.red, fontSize: '0.65rem', letterSpacing: '0.1em', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>
+            ✕ ELIMINAR {demos.length} MATERIALES DE DEMOSTRACIÓN
+          </button>
+        )}
+      </div>
+
+      {/* Resultado de la prueba, paso a paso */}
+      {prueba && (
+        <div style={{ marginBottom: '1rem', padding: '0.8rem', border: `1px solid ${prueba.ok ? 'rgba(74,155,127,0.35)' : 'rgba(224,85,85,0.3)'}`, borderRadius: '7px', background: prueba.ok ? 'rgba(74,155,127,0.06)' : 'rgba(224,85,85,0.05)' }}>
+          <div style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: prueba.ok ? G.green : G.red, marginBottom: '0.6rem' }}>
+            {prueba.ok ? '✓ CARGA OPERATIVA' : '✕ LA CARGA FALLA'}
+          </div>
+          {prueba.pasos.map((p, i) => (
+            <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.4rem', fontSize: '0.74rem', lineHeight: 1.45 }}>
+              <span style={{ flexShrink: 0, color: p.ok ? G.green : G.red }}>{p.ok ? '✓' : '✕'}</span>
+              <span style={{ color: 'rgba(245,237,216,0.75)' }}>
+                <strong style={{ color: G.parchment }}>{p.paso}:</strong> {p.detalle}
+              </span>
+            </div>
+          ))}
         </div>
       )}
 
