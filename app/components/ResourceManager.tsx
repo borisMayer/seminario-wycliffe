@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { getVideoEmbed } from '@/lib/videoEmbed'
 
 const G = { gold: '#C9A84C', goldLight: '#E8C97A', goldDim: '#7a6230', ink: '#021A38', parchment: '#F5EDD8', green: '#4A9B7F', red: '#E05555' }
 
@@ -45,6 +46,7 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
   const [ok, setOk] = useState('')
   const [mode, setMode] = useState<'archivo' | 'enlace'>('archivo')
   const [dragging, setDragging] = useState(false)
+  const [diag, setDiag] = useState<{ ok: boolean; message: string; pdfDelivery?: boolean | null } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -64,6 +66,16 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
   }, [lessonId])
 
   useEffect(() => { load() }, [load])
+
+  // Comprobación de la conexión con Cloudinary al abrir el gestor
+  useEffect(() => {
+    let vivo = true
+    fetch('/api/admin/cloudinary-check')
+      .then(r => r.json())
+      .then(d => { if (vivo) setDiag(d) })
+      .catch(() => { if (vivo) setDiag({ ok: false, message: 'No se pudo verificar la conexión con Cloudinary.' }) })
+    return () => { vivo = false }
+  }, [])
 
   const flash = (msg: string, isError = false) => {
     if (isError) { setError(msg); setOk(''); setTimeout(() => setError(''), 6000) }
@@ -129,6 +141,18 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
       <div style={{ fontSize: '0.6rem', letterSpacing: '0.25em', color: G.goldDim, marginBottom: '0.9rem', textTransform: 'uppercase' }}>
         Materiales · {lessonTitle}
       </div>
+
+      {/* Estado de la conexión con Cloudinary */}
+      {diag && !diag.ok && (
+        <div style={{ fontSize: '0.75rem', color: G.red, padding: '0.6rem 0.8rem', background: 'rgba(224,85,85,0.08)', border: '1px solid rgba(224,85,85,0.25)', borderRadius: '6px', marginBottom: '0.9rem', lineHeight: 1.5 }}>
+          ⚠ <strong>Cloudinary no está operativo.</strong> {diag.message}
+        </div>
+      )}
+      {diag?.ok && diag.pdfDelivery === false && (
+        <div style={{ fontSize: '0.75rem', color: '#E8C97A', padding: '0.6rem 0.8rem', background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: '6px', marginBottom: '0.9rem', lineHeight: 1.5 }}>
+          ⚠ La entrega de PDF y ZIP está bloqueada en tu cuenta. Actívala en console.cloudinary.com → Settings → Security → «PDF and ZIP files delivery» → Allow delivery. Sin eso, los PDF suben pero el alumno no puede abrirlos.
+        </div>
+      )}
 
       {/* Lista */}
       {loading ? (
@@ -205,8 +229,17 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
         ) : (
           <div style={{ marginBottom: '0.8rem' }}>
             <label style={lbl}>URL DEL RECURSO</label>
-            <input value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
-              placeholder="https://youtube.com/watch?v=… o cualquier enlace" style={box} />
+            <input value={form.url} onChange={e => {
+                const url = e.target.value
+                const esVideo = getVideoEmbed(url).kind !== 'link'
+                setForm(f => ({ ...f, url, type: esVideo ? 'video' : f.type }))
+              }}
+              placeholder="YouTube, Vimeo, Google Drive, Loom, Dailymotion, Facebook, Twitch o cualquier enlace" style={box} />
+            {form.url && getVideoEmbed(form.url).kind !== 'link' && (
+              <div style={{ fontSize: '0.68rem', color: G.green, marginTop: '0.35rem' }}>
+                ✓ Video reconocido: se reproducirá incrustado dentro de la lección.
+              </div>
+            )}
           </div>
         )}
 

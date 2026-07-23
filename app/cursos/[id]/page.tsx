@@ -3,6 +3,7 @@ import { useState, useEffect, use } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import LessonResources from '@/app/components/LessonResources'
+import { getVideoEmbed as getVideoEmbedSrc } from '@/lib/videoEmbed'
 
 type Lesson = { id: string; title: string; content: string; videoUrl: string | null; order: number }
 type Course = { id: string; title: string; description: string; category: string; lessons: Lesson[]; enrolled: boolean; _count: { enrollments: number } }
@@ -62,17 +63,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
   const totalCount = course?.lessons.length ?? 0
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 
-  const getVideoEmbed = (url: string) => {
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const id = url.split('v=')[1]?.split('&')[0] || url.split('/').pop()
-      return `https://www.youtube.com/embed/${id}`
-    }
-    if (url.includes('vimeo.com')) {
-      const id = url.split('/').pop()
-      return `https://player.vimeo.com/video/${id}`
-    }
-    return url
-  }
+  const getVideoEmbed = (url: string) => getVideoEmbedSrc(url).src
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">

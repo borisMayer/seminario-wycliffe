@@ -5,6 +5,7 @@ import {
   Video, FileText, Headphones, Presentation, BookOpen,
   Link2, ImageIcon, Download, Check, Loader2, ExternalLink, Archive
 } from 'lucide-react'
+import { isExternalPlatformVideo } from '@/lib/videoEmbed'
 
 /* ─────────────────────────── Tipos ─────────────────────────── */
 
@@ -65,8 +66,8 @@ function formatDuration(seconds?: number | null): string | null {
 function isDownloadable(r: LessonResource): boolean {
   if (r.downloadable === false) return false
   if (r.type === 'link') return false
-  // Los videos incrustados (YouTube/Vimeo) se ven, no se descargan.
-  if (r.type === 'video' && /youtube\.com|youtu\.be|vimeo\.com/.test(r.url)) return false
+  // Los videos alojados en plataformas externas (YouTube, Vimeo, Drive…) se ven, no se descargan.
+  if (r.type === 'video' && isExternalPlatformVideo(r.url)) return false
   return true
 }
 
