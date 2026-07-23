@@ -1,5 +1,6 @@
 'use client'
 import { Emblem } from '@/app/components/Emblem'
+import { ResourceManager } from '@/app/components/ResourceManager'
 import { useState, useEffect, useCallback } from 'react'
 
 type Stats = { users: number; courses: number; enrollments: number; posts: number }
@@ -106,6 +107,7 @@ export default function RectorPanel() {
   const [toast, setToast] = useState('')
   const [newCourse, setNewCourse] = useState({ title: '', description: '', category: '', published: false, isFree: true, price: 0 })
   const [newLesson, setNewLesson] = useState({ title: '', content: '', videoUrl: '' })
+  const [openResources, setOpenResources] = useState<string | null>(null)
   const [editLesson, setEditLesson] = useState<Lesson | null>(null)
   const [showLessonForm, setShowLessonForm] = useState(false)
   const [editingPrice, setEditingPrice] = useState<string | null>(null)
@@ -521,7 +523,8 @@ export default function RectorPanel() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                     {lessons.sort((a,b) => a.order - b.order).map((l, i) => (
-                      <div key={l.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '1.1rem 1.3rem', border: `1px solid ${editLesson?.id === l.id ? 'rgba(201,168,76,0.4)' : 'rgba(201,168,76,0.12)'}`, borderRadius: '8px', background: editLesson?.id === l.id ? 'rgba(201,168,76,0.04)' : 'rgba(255,255,255,0.02)' }}>
+                      <div key={l.id}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '1.1rem 1.3rem', border: `1px solid ${editLesson?.id === l.id ? 'rgba(201,168,76,0.4)' : 'rgba(201,168,76,0.12)'}`, borderRadius: '8px', background: editLesson?.id === l.id ? 'rgba(201,168,76,0.04)' : 'rgba(255,255,255,0.02)' }}>
                         {/* Order badge */}
                         <div style={{ flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', color: G.goldDim }}>
                           {l.order}
@@ -536,9 +539,12 @@ export default function RectorPanel() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
                           <button onClick={() => moveLesson(l, -1)} disabled={i === 0} style={btn('ghost', { padding:'0.3rem 0.5rem', opacity: i===0 ? 0.3 : 1 })}>↑</button>
                           <button onClick={() => moveLesson(l, 1)} disabled={i === lessons.length-1} style={btn('ghost', { padding:'0.3rem 0.5rem', opacity: i===lessons.length-1 ? 0.3 : 1 })}>↓</button>
+                          <button onClick={() => setOpenResources(openResources === l.id ? null : l.id)} style={btn(openResources === l.id ? 'primary' : 'secondary', { fontSize:'0.68rem' })}>📎 MATERIALES</button>
                           <button onClick={() => { setEditLesson(l); setShowLessonForm(false) }} style={btn('secondary', { fontSize:'0.68rem' })}>EDITAR</button>
                           <button onClick={() => deleteLesson(l.id)} style={btn('danger', { fontSize:'0.68rem' })}>ELIMINAR</button>
                         </div>
+                      </div>
+                      {openResources === l.id && <ResourceManager lessonId={l.id} lessonTitle={l.title} />}
                       </div>
                     ))}
                   </div>

@@ -62,3 +62,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ lessonI
     return NextResponse.json({ error: 'Error creating resource' }, { status: 500 })
   }
 }
+
+// DELETE /api/lessons/[lessonId]/resources  { id }  — solo RECTOR
+export async function DELETE(req: Request) {
+  const session = await getServerSession(authOptions)
+  if (!session || (session.user as any).role !== 'RECTOR') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  try {
+    const { id } = await req.json()
+    await prisma.lessonResource.delete({ where: { id } })
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    console.error('[API ERROR]', error)
+    return NextResponse.json({ error: 'Error deleting resource' }, { status: 500 })
+  }
+}
