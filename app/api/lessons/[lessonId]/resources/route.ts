@@ -71,7 +71,12 @@ export async function DELETE(req: Request) {
   }
   try {
     const { id } = await req.json()
-    await prisma.lessonResource.delete({ where: { id } })
+    const resource = await prisma.lessonResource.delete({ where: { id } })
+    // Borrado del binario en Cloudinary (no bloquea si falla)
+    if (resource?.url) {
+      const { destroyByUrl } = await import('@/lib/cloudinary')
+      await destroyByUrl(resource.url)
+    }
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('[API ERROR]', error)

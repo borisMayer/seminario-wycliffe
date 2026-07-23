@@ -112,7 +112,7 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
   }
 
   const remove = async (id: string, title: string) => {
-    if (!confirm(`¿Eliminar "${title}"? El archivo seguirá en Cloudinary.`)) return
+    if (!confirm(`¿Eliminar "${title}"? El archivo también se borrará de Cloudinary.`)) return
     await fetch(`/api/lessons/${lessonId}/resources`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -194,12 +194,12 @@ export function ResourceManager({ lessonId, lessonTitle }: { lessonId: string; l
                   Arrastra el archivo o <span style={{ color: G.gold }}>haz clic para elegirlo</span>
                 </div>
                 <div style={{ fontSize: '0.65rem', color: 'rgba(245,237,216,0.28)', marginTop: '0.3rem' }}>
-                  Audio y video hasta 100 MB · PDF, Word, PowerPoint, EPUB e imágenes hasta 10 MB
+                  Audio y video hasta 100 MB · PDF, Word, Excel, PowerPoint, CSV, ZIP, EPUB e imágenes hasta 10 MB
                 </div>
               </>
             )}
             <input ref={inputRef} type="file" style={{ display: 'none' }}
-              accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.md,.epub,.mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm,.mov,.jpg,.jpeg,.png,.webp"
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.rtf,.odt,.zip,.txt,.md,.epub,.mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm,.mov,.jpg,.jpeg,.png,.webp"
               onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); e.target.value = '' }} />
           </div>
         ) : (

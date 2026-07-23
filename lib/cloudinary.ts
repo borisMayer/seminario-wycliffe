@@ -44,4 +44,38 @@ export function getCloudinary() {
   return cloudinary
 }
 
+/**
+ * Borra de Cloudinary el archivo al que apunta una URL de entrega.
+ *
+ * Deriva el public_id y el resource_type desde la propia URL, de modo que
+ * no hace falta guardar esos campos en la base de datos. Si la URL no es
+ * de Cloudinary (p. ej. un enlace externo de YouTube) no hace nada.
+ *
+ * Nunca lanza: un fallo al borrar el binario no debe impedir que el
+ * registro desaparezca de la plataforma.
+ */
+export async function destroyByUrl(url: string): Promise<void> {
+  try {
+    if (!url.includes('res.cloudinary.com')) return
+
+    // https://res.cloudinary.com/<cloud>/<resource_type>/upload/v123/carpeta/archivo.ext
+    const match = url.match(
+      /res\.cloudinary\.com\/[^/]+\/(image|video|raw)\/upload\/(?:v\d+\/)?(.+)$/
+    )
+    if (!match) return
+
+    const resourceType = match[1] as 'image' | 'video' | 'raw'
+    let publicId = decodeURIComponent(match[2])
+
+    // En image/video la extensión NO forma parte del public_id; en raw sí.
+    if (resourceType !== 'raw') {
+      publicId = publicId.replace(/\.[^./]+$/, '')
+    }
+
+    await getCloudinary().uploader.destroy(publicId, { resource_type: resourceType })
+  } catch (e) {
+    console.error('[Cloudinary] No se pudo borrar el archivo remoto:', e)
+  }
+}
+
 export default getCloudinary

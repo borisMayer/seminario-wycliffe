@@ -30,6 +30,22 @@ npm run dev
 ```
 
 ## Variables de entorno requeridas
-Ver `.env.example`: `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `CLOUDINARY_URL`, `MERCADOPAGO_ACCESS_TOKEN`, `RESEND_API_KEY`.
+Ver `.env.example`: `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `MERCADOPAGO_ACCESS_TOKEN`, `RESEND_API_KEY`.
+
+## Materiales de lección (Cloudinary)
+
+**Flujo:** Panel Rector → pestaña *Lecciones* de un curso → botón *Materiales* de la lección → arrastrar el archivo o pegar un enlace externo → *Añadir material*. El alumno lo ve al instante en la lección (`/cursos/[id]`), con filtros por tipo, marcado de revisado y «Descargar todo» (ZIP).
+
+**Carpetas en Cloudinary** (se crean solas en la primera subida):
+- `seminario-wycliffe/materiales/<lessonId>/` — materiales de cada lección
+- `seminario-wycliffe/trabajos/<userId>/` — entregas de alumnos
+
+**Formatos y límites (plan Free de Cloudinary):**
+- Audio y video (mp3, wav, m4a, mp4, webm, mov): hasta 100 MB
+- PDF, Word, Excel, PowerPoint, CSV, RTF, ODT, ZIP, EPUB, TXT, imágenes: hasta 10 MB
+
+**Importante — entrega de PDF/ZIP:** en cuentas nuevas de Cloudinary la descarga pública de PDF y ZIP viene deshabilitada. Actívala una sola vez en **console.cloudinary.com → Settings → Security → "PDF and ZIP files delivery" → Allow delivery**. Sin esto, los PDF suben bien pero el alumno recibe un error al abrirlos.
+
+Al eliminar un material desde el Panel Rector, el archivo también se borra de Cloudinary automáticamente.
 
 — Seminario Wycliffe de Teología · www.wycliffe-chile.com

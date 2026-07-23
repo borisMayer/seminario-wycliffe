@@ -60,7 +60,16 @@ export async function DELETE(req: Request) {
   if (!await checkRector()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const { id } = await req.json()
+    // Antes de borrar, recoger las URLs de sus materiales para limpiar Cloudinary
+    const resources = await prisma.lessonResource.findMany({
+      where: { lessonId: id },
+      select: { url: true }
+    })
     await prisma.lesson.delete({ where: { id } })
+    if (resources.length) {
+      const { destroyByUrl } = await import('@/lib/cloudinary')
+      await Promise.allSettled(resources.map((r: { url: string }) => destroyByUrl(r.url)))
+    }
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[API ERROR]', error)
