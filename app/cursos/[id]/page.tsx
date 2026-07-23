@@ -262,7 +262,17 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
                 onCount={setMaterialCount}
               />
 
-              {/* Navigation & completion */}
+              {/* Atajo para el Rector: gestionar los materiales de esta lección */}
+              {(session?.user as any)?.role === 'RECTOR' && (
+                <div style={{ marginTop: '1rem', padding: '0.8rem 1rem', border: '1px dashed rgba(201,168,76,0.3)', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: 'Georgia, serif', fontSize: '0.78rem', color: 'rgba(245,237,216,0.5)' }}>
+                    Vista de Rector: aquí solo se consultan los materiales. Para subir archivos o pegar enlaces de video, entra al panel de administración.
+                  </span>
+                  <Link href="/rector" style={{ fontFamily: 'Georgia, serif', fontSize: '0.7rem', letterSpacing: '0.12em', padding: '0.5rem 1rem', background: '#C9A84C', color: '#021A38', borderRadius: '5px', textDecoration: 'none', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                    ⚙ GESTIONAR MATERIALES
+                  </Link>
+                </div>
+              )}              {/* Navigation & completion */}
               <div style={{ marginTop: '3rem', borderTop: '1px solid rgba(201,168,76,0.1)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                 {/* Prev */}
                 <button
