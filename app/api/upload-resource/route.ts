@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import cloudinary from '@/lib/cloudinary'
+import { getCloudinary } from '@/lib/cloudinary'
 
 /**
  * Subida de materiales de lección a Cloudinary.
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
     const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9._-]/g, '_')
 
     const result = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
+      getCloudinary().uploader.upload_stream(
         {
           folder: `seminario-wycliffe/materiales/${lessonId}`,
           resource_type: kind.cloudinaryType,

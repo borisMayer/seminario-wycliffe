@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import cloudinary from '@/lib/cloudinary'
+import { getCloudinary } from '@/lib/cloudinary'
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     const userId = (session.user as any).id
 
     const result = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
+      getCloudinary().uploader.upload_stream(
         {
           folder: `seminario-wycliffe/trabajos/${userId}`,
           resource_type: 'raw',
