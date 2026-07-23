@@ -2,6 +2,7 @@
 import { useState, useEffect, use } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import LessonResources from '@/app/components/LessonResources'
 
 type Lesson = { id: string; title: string; content: string; videoUrl: string | null; order: number }
 type Course = { id: string; title: string; description: string; category: string; lessons: Lesson[]; enrolled: boolean; _count: { enrollments: number } }
@@ -252,12 +253,19 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               )}
 
               {/* Lesson content */}
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.05rem', lineHeight: 1.9, color: 'rgba(245,237,216,0.78)', whiteSpace: 'pre-wrap', marginBottom: '3rem' }}>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.05rem', lineHeight: 1.9, color: 'rgba(245,237,216,0.78)', whiteSpace: 'pre-wrap' }}>
                 {activeLesson.content}
               </div>
 
+              {/* Materiales multiformato de la lección */}
+              <LessonResources
+                key={activeLesson.id}
+                lessonId={activeLesson.id}
+                lessonTitle={activeLesson.title}
+              />
+
               {/* Navigation & completion */}
-              <div style={{ borderTop: '1px solid rgba(201,168,76,0.1)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ marginTop: '3rem', borderTop: '1px solid rgba(201,168,76,0.1)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                 {/* Prev */}
                 <button
                   onClick={() => { const idx = course.lessons.findIndex(l => l.id === activeLesson.id); if (idx > 0) setActiveLesson(course.lessons[idx - 1]) }}
@@ -285,11 +293,11 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
 
               {/* Course complete banner */}
               {progressPct === 100 && (
-                <div style={{ marginTop: '2rem', padding: '1.5rem', border: '1px solid rgba(74,155,127,0.3)', borderRadius: '8px', background: 'rgba(74,155,127,0.05)', textAlign: 'center' }}>
+                <div style={{ marginTop: "2rem", padding: '1.5rem', border: '1px solid rgba(74,155,127,0.3)', borderRadius: '8px', background: 'rgba(74,155,127,0.05)', textAlign: 'center' }}>
                   <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✠</div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', letterSpacing: '0.2em', color: '#4A9B7F', marginBottom: '0.3rem' }}>CURSO COMPLETADO</div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '0.85rem', color: 'rgba(245,237,216,0.45)', fontStyle: 'italic' }}>
-                    "Has caminado fielmente por el sendero del rector"
+                    "Has recorrido fielmente el curso entero"
                   </div>
                 </div>
               )}
